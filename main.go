@@ -1,0 +1,51 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"os/user"
+	"path/filepath"
+
+	"github.com/ipfsync/ipfsmanager"
+	"go.uber.org/fx"
+)
+
+func NewIpfsManager(lc fx.Lifecycle) (*ipfsmanager.IpfsManager, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+	im, err := ipfsmanager.NewIpfsManager(filepath.Join(usr.HomeDir, "ipfshare"))
+	if err != nil {
+		return nil, err
+	}
+	lc.Append(fx.Hook{
+		OnStart: func(context.Context) error {
+			err := im.StartNode()
+			keys, err := im.API.Key().List(context.TODO())
+			if err != nil {
+				return err
+			}
+
+			for _, key := range keys {
+				fmt.Printf("Key ID: %s", key.ID())
+			}
+
+			return err
+		},
+		OnStop: func(ctx context.Context) error {
+			return im.StopNode()
+		},
+	})
+	return im, nil
+}
+
+func main() {
+
+	app := fx.New(
+		fx.Invoke(NewIpfsManager),
+	)
+
+	app.Run()
+
+}
