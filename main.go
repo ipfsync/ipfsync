@@ -6,6 +6,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/ipfsync/ipfsync/core"
+
 	"github.com/ipfsync/appserver"
 
 	"github.com/ipfsync/ipfsmanager"
@@ -42,8 +44,8 @@ func NewIpfsManager(lc fx.Lifecycle) (*ipfsmanager.IpfsManager, error) {
 	return im, nil
 }
 
-func NewAppServer(lc fx.Lifecycle) (*appserver.AppServer, error) {
-	srv := appserver.NewAppServer()
+func NewAppServer(lc fx.Lifecycle, api *core.Api) (*appserver.AppServer, error) {
+	srv := appserver.NewAppServer(api)
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			srv.Start()
@@ -60,7 +62,7 @@ func NewAppServer(lc fx.Lifecycle) (*appserver.AppServer, error) {
 func main() {
 
 	app := fx.New(
-		fx.Invoke(NewIpfsManager),
+		fx.Provide(core.NewApi, NewIpfsManager),
 		fx.Invoke(NewAppServer),
 	)
 
