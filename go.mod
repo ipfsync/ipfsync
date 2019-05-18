@@ -6,6 +6,7 @@ require (
 	github.com/ipfs/interface-go-ipfs-core v0.0.6
 	github.com/ipfsync/appserver v0.0.0
 	github.com/ipfsync/ipfsmanager v0.0.0
+	github.com/libp2p/go-libp2p-net v0.0.2
 	go.uber.org/fx v1.9.0
 )
 
