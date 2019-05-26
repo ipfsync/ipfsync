@@ -64,3 +64,29 @@ func (api *Api) Peers() ([]Peerinfo, bool, error) {
 
 	return peersinfo, changed, nil
 }
+
+func (api *Api) NewCollection() (string, error) {
+	keyName := "ipfsync_ipnskey"
+	ctx := context.TODO()
+
+	// Remove possible existed key
+	_, _ = api.mgr.API.Key().Remove(ctx, keyName)
+
+	// Generate new key
+	k, err := api.mgr.API.Key().Generate(context.TODO(), keyName)
+	if err != nil {
+		return "", err
+	}
+
+	id := k.ID().Pretty()
+
+	// Rename new key to ID string
+	_, _, err = api.mgr.API.Key().Rename(ctx, keyName, id)
+	if err != nil {
+		return "", err
+	}
+
+	// TODO: Insert data into datastore
+
+	return id, nil
+}
