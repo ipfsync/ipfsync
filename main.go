@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"os/user"
-	"path/filepath"
+
+	"github.com/spf13/viper"
 
 	"github.com/ipfsync/ipfsync/core"
 
@@ -14,12 +14,8 @@ import (
 	"go.uber.org/fx"
 )
 
-func NewIpfsManager(lc fx.Lifecycle) (*ipfsmanager.IpfsManager, error) {
-	usr, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-	im, err := ipfsmanager.NewIpfsManager(filepath.Join(usr.HomeDir, "ipfshare"))
+func NewIpfsManager(lc fx.Lifecycle, cfg *viper.Viper) (*ipfsmanager.IpfsManager, error) {
+	im, err := ipfsmanager.NewIpfsManager(cfg.GetString("repoDir"))
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +40,8 @@ func NewIpfsManager(lc fx.Lifecycle) (*ipfsmanager.IpfsManager, error) {
 	return im, nil
 }
 
-func NewAppServer(lc fx.Lifecycle, api *core.Api) (*appserver.AppServer, error) {
-	srv := appserver.NewAppServer(api)
+func NewAppServer(lc fx.Lifecycle, api *core.Api, cfg *viper.Viper) (*appserver.AppServer, error) {
+	srv := appserver.NewAppServer(api, cfg)
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			srv.Start()
@@ -62,7 +58,7 @@ func NewAppServer(lc fx.Lifecycle, api *core.Api) (*appserver.AppServer, error) 
 func main() {
 
 	app := fx.New(
-		fx.Provide(core.NewApi, NewIpfsManager),
+		fx.Provide(core.NewApi, NewIpfsManager, core.NewConfig),
 		fx.Invoke(NewAppServer),
 	)
 
