@@ -17,6 +17,7 @@ func NewConfig() (*viper.Viper, error) {
 		return nil, err
 	}
 
+	// TODO: Allow to specify dataDir via command argument
 	dataDir := filepath.Join(usr.HomeDir, ".ipfsync")
 
 	// Make sure dataDir exists and writable
@@ -30,6 +31,8 @@ func NewConfig() (*viper.Viper, error) {
 
 	// Defaults
 
+	// DataDir
+	cfg.SetDefault("dataDir", dataDir)
 	// IPFS repository directory
 	cfg.SetDefault("repoDir", filepath.Join(dataDir, "ipfs"))
 

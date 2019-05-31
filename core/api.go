@@ -5,6 +5,10 @@ import (
 	"sort"
 	"time"
 
+	"github.com/ipfsync/resource"
+
+	"github.com/spf13/viper"
+
 	net "github.com/libp2p/go-libp2p-net"
 
 	"github.com/ipfsync/ipfsmanager"
@@ -12,10 +16,12 @@ import (
 
 type Api struct {
 	mgr *ipfsmanager.IpfsManager
+	cfg *viper.Viper
+	ds  *resource.Datastore
 }
 
-func NewApi(mgr *ipfsmanager.IpfsManager) *Api {
-	return &Api{mgr: mgr}
+func NewApi(mgr *ipfsmanager.IpfsManager, cfg *viper.Viper, ds *resource.Datastore) *Api {
+	return &Api{mgr: mgr, cfg: cfg, ds: ds}
 }
 
 type Peerinfo struct {
@@ -65,28 +71,39 @@ func (api *Api) Peers() ([]Peerinfo, bool, error) {
 	return peersinfo, changed, nil
 }
 
-func (api *Api) NewCollection() (string, error) {
-	keyName := "ipfsync_ipnskey"
-	ctx := context.TODO()
+func (api *Api) NewCollection(name, address string) (*resource.Collection, error) {
+	if address == "" {
+		keyName := "ipfsync_ipnskey"
+		ctx := context.TODO()
 
-	// Remove possible existed key
-	_, _ = api.mgr.API.Key().Remove(ctx, keyName)
+		// Remove possible existed key
+		_, _ = api.mgr.API.Key().Remove(ctx, keyName)
 
-	// Generate new key
-	k, err := api.mgr.API.Key().Generate(context.TODO(), keyName)
-	if err != nil {
-		return "", err
+		// Generate new key
+		k, err := api.mgr.API.Key().Generate(context.TODO(), keyName)
+		if err != nil {
+			return nil, err
+		}
+
+		address = k.ID().Pretty()
+
+		// Rename new key to ID string
+		_, _, err = api.mgr.API.Key().Rename(ctx, keyName, address)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	id := k.ID().Pretty()
-
-	// Rename new key to ID string
-	_, _, err = api.mgr.API.Key().Rename(ctx, keyName, id)
-	if err != nil {
-		return "", err
+	if name == "" {
+		name = address
 	}
 
-	// TODO: Insert data into datastore
+	// Insert data into datastore
+	c := &resource.Collection{Name: name, IPNSAddress: address}
+	err := api.ds.CreateOrUpdateCollection(c)
+	if err != nil {
+		return c, err
+	}
 
-	return id, nil
+	return c, nil
 }
