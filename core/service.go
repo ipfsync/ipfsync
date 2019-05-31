@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/ipfsync/ipfsync/core/api"
+
 	"github.com/ipfsync/resource"
 
 	"github.com/ipfsync/appserver"
@@ -39,7 +41,7 @@ func NewIpfsManager(lc fx.Lifecycle, cfg *viper.Viper) (*ipfsmanager.IpfsManager
 	return im, nil
 }
 
-func NewAppServer(lc fx.Lifecycle, api *Api, cfg *viper.Viper) (*appserver.AppServer, error) {
+func NewAppServer(lc fx.Lifecycle, api *api.Api, cfg *viper.Viper) (*appserver.AppServer, error) {
 	srv := appserver.NewAppServer(api, cfg)
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
