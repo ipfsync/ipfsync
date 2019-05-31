@@ -10,6 +10,7 @@ require (
 	github.com/spf13/viper v1.4.0
 	go.uber.org/dig v1.7.0 // indirect
 	go.uber.org/fx v1.9.0
+	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 )
 
 replace github.com/ipfsync/appserver => ../appserver
