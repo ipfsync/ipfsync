@@ -9,6 +9,7 @@ require (
 	github.com/libp2p/go-libp2p-net v0.0.2
 	github.com/spf13/viper v1.4.0
 	go.uber.org/fx v1.9.0
+	google.golang.org/genproto v0.0.0-20180831171423-11092d34479b // indirect
 )
 
 replace github.com/ipfsync/appserver => ../appserver
