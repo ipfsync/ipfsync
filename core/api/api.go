@@ -74,6 +74,7 @@ func (api *Api) Peers() ([]Peerinfo, bool, error) {
 func (api *Api) NewCollection(name, address string) (*resource.Collection, error) {
 	if address == "" {
 		// TODO: Reuse empty collection
+
 		keyName := "ipfsync_ipnskey"
 		ctx := context.TODO()
 
