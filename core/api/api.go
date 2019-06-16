@@ -109,3 +109,17 @@ func (api *Api) NewCollection(name, address string) (*resource.Collection, error
 
 	return c, nil
 }
+
+func (api *Api) ListCollections(t string) ([]*resource.Collection, error) {
+	var mineFlag resource.FilterFlag
+	switch t {
+	case "synced":
+		mineFlag = resource.FilterNone
+	case "mine":
+		mineFlag = resource.FilterOnly
+	default:
+		mineFlag = resource.FilterAny
+	}
+
+	return api.ds.ListCollections(mineFlag, resource.FilterAny)
+}
